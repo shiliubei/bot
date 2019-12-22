@@ -11,12 +11,26 @@ public class TelegramUser {
 
     @Id
     private Long chatId;
+    private int statetId;
     private String songName;
     private Long songId;
     @Transient
     private File track;
 
     public TelegramUser() {
+    }
+
+    public TelegramUser(Long chatId, int statetId) {
+        this.chatId = chatId;
+        this.statetId = statetId;
+    }
+
+    public int getStatetId() {
+        return statetId;
+    }
+
+    public void setStatetId(int statetId) {
+        this.statetId = statetId;
     }
 
     public Long getChatId() {

@@ -10,7 +10,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public enum BotState {
 
 
-    EnterAuthorName {
+    Start (false){
+
         @Override
         public TelegramUser sendToServer(BotContext botContext) {
             return null;
@@ -18,34 +19,25 @@ public enum BotState {
 
         @Override
         public void enter(BotContext context) {
-            sendMessage(context, "Hello");
+            sendMessage(context, "Привет");
         }
 
         @Override
         public BotState nextState() {
-            return EnterSongName;
+            return EnterPerformerName;
         }
     },
 
-    EnterSongName {
+    EnterPerformerName {
         @Override
         public void enter(BotContext context) {
-            sendMessage(context, "Введите название песни и исполнителя");
+            sendMessage(context, "Введите исполнителя");
         }
 
         @Override
         public void handleInput(BotContext context) {
-            //todo
-
-//            context.getTelegramUser().setPhone(context.getInput());
-            String songName = context.getInput();
-
-            TelegramUser telegramUser = context.getTelegramUser();
-            telegramUser.setSongName(songName);
-
-            if (telegramApiService.sendSong(telegramUser) != null) {
-
-            }
+            String performerName = context.getInput();
+            context.getTelegramUser().setPerformerName(performerName);
         }
 
         @Override
@@ -55,29 +47,23 @@ public enum BotState {
 
         @Override
         public BotState nextState() {
-            return EnterMail;
+            return EnterSongName;
         }
     },
 
-    EnterMail {
+    EnterSongName {
         private BotState next;
 
         @Override
         public void enter(BotContext context) {
-            sendMessage(context, "Enter your email address please:");
+            sendMessage(context, "Введите название песни:");
         }
 
         @Override
         public void handleInput(BotContext context) {
-            String email = context.getInput();
 
-            if (true) {
-//                context.getTelegramUser().setEmail(context.getInput());
-                next = Approved;
-            } else {
-                sendMessage(context, "Wrong e-mail address!");
-                next = EnterMail;
-            }
+            context.getTelegramUser().setSongName(context.getInput());
+
         }
 
         @Override
@@ -87,11 +73,14 @@ public enum BotState {
 
         @Override
         public BotState nextState() {
-            return next;
+            return Approve;
         }
     },
 
-    Approved(false) {
+    //Юзер получил звуковой файл для того чтобы уточнить нужная ли это песня.
+    //Юзер должен написать "да" если это та песня.
+    Approve() {
+
         @Override
         public TelegramUser sendToServer(BotContext botContext) {
             return null;
@@ -100,7 +89,7 @@ public enum BotState {
         @Override
         public void enter(BotContext context) {
 
-            sendMessage(context, "Thanks YOU! \n you can use command 'quote'!");
+            sendMessage(context, "Это нужная песня? (Введите \"да\" если это та песня)");
         }
 
         @Override

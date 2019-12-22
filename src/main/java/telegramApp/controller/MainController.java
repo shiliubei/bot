@@ -38,13 +38,13 @@ public class MainController {
             sendAudio.setAudio(tlgUser.getTrack());
             sendAudio.setChatId(tlgUser.getChatId());
 
-            response.setText("Это нужная песня? (Введите \"да\" если это та песня)");
+//            response.setText("Это нужная песня? (Введите \"да\" если это та песня)");
 
             telegramUserService.addTelegramUser(tlgUser);
 
             try {
                 bot.execute(sendAudio);
-                bot.execute(response);
+//                bot.execute(response);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }

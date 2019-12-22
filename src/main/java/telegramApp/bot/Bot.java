@@ -53,8 +53,6 @@ public class Bot extends TelegramLongPollingBot {
 
         TelegramUser telegramUser = telegramUserService.findByChatId(chatId);
 
-
-
         BotContext context;
         BotState state;
 
@@ -77,17 +75,19 @@ public class Bot extends TelegramLongPollingBot {
 
         state.handleInput(context);
 
-        do {
+       do {
             state = state.nextState();
-            TelegramUser tlgUser = state.sendToServer(context);
-            if(tlgUser != null){
+            TelegramUser tlgUser = context.getTelegramUser();
+            // если на этапе 3
+            if(context.getTelegramUser().getStatetId()==2 && (tlgUser.getSongName()!= null || tlgUser.getPerformerName() !=null)){
                 telegramApiService.sendSong(tlgUser);
             }
             state.enter(context);
-        }while (!state.isInputNeeded());
+        }
+        while (!state.isInputNeeded());
 
         telegramUser.setStatetId(state.ordinal());
-//        telegramUserService.updateUser(telegramUser);
+        telegramUserService.updateTelegramUser(telegramUser);
     }
 
 

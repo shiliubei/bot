@@ -26,4 +26,9 @@ public class TelegramUserServiceImpl implements TelegramUserService {
     public void addTelegramUser (TelegramUser telegramUser){
         telegramUserRepo.save(telegramUser);
     }
+
+    @Override
+    public void updateTelegramUser(TelegramUser telegramUser) {
+        telegramUserRepo.save(telegramUser);
+    }
 }

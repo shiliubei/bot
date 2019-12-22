@@ -12,6 +12,7 @@ public class TelegramUser {
     @Id
     private Long chatId;
     private int statetId;
+    private String performerName;
     private String songName;
     private Long songId;
     @Transient
@@ -31,6 +32,14 @@ public class TelegramUser {
 
     public void setStatetId(int statetId) {
         this.statetId = statetId;
+    }
+
+    public String getPerformerName() {
+        return performerName;
+    }
+
+    public void setPerformerName(String performerName) {
+        this.performerName = performerName;
     }
 
     public Long getChatId() {

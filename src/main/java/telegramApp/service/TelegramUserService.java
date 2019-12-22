@@ -9,4 +9,6 @@ public interface TelegramUserService {
     void deleteByChatId(Long id);
 
     void addTelegramUser(TelegramUser telegramUser);
+
+    void updateTelegramUser(TelegramUser telegramUser);
 }

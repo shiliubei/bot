@@ -1,7 +1,7 @@
 package telegramApp.service;
 
 import org.springframework.stereotype.Service;
-import telegramApp.model.TelegramUser;
+import telegramApp.model.TelegramMessage;
 import telegramApp.repo.TelegramUserRepo;
 
 import javax.transaction.Transactional;
@@ -15,7 +15,7 @@ public class TelegramUserServiceImpl implements TelegramUserService {
     }
 
     @Transactional
-    public TelegramUser findByChatId(long id){
+    public TelegramMessage findByChatId(long id){
         return telegramUserRepo.findByChatId(id);
     }
 
@@ -23,12 +23,12 @@ public class TelegramUserServiceImpl implements TelegramUserService {
         telegramUserRepo.delete(telegramUserRepo.findByChatId(id));
     }
     @Transactional
-    public void addTelegramUser (TelegramUser telegramUser){
-        telegramUserRepo.save(telegramUser);
+    public void addTelegramUser (TelegramMessage telegramMessage){
+        telegramUserRepo.save(telegramMessage);
     }
 
     @Override
-    public void updateTelegramUser(TelegramUser telegramUser) {
-        telegramUserRepo.save(telegramUser);
+    public void updateTelegramUser(TelegramMessage telegramMessage) {
+        telegramUserRepo.save(telegramMessage);
     }
 }

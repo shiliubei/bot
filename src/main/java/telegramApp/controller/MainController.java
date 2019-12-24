@@ -8,7 +8,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendAudio;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import telegramApp.bot.Bot;
-import telegramApp.model.TelegramUser;
+import telegramApp.dto.SongResponce;
+import telegramApp.model.TelegramMessage;
 import telegramApp.service.TelegramApiService;
 import telegramApp.service.TelegramUserService;
 
@@ -28,23 +29,30 @@ public class MainController {
     }
 
     @PostMapping(value = "/song")
-    public void requestSong(@RequestBody TelegramUser tlgUser) {
+    public void requestSong(@RequestBody SongResponce songResponce) {
 
         SendAudio sendAudio = new SendAudio();
         SendMessage response = new SendMessage();
-        response.setChatId(tlgUser.getChatId());
-        if (tlgUser.getTrack() != null) {
+        Long chatId = songResponce.getChatId();
+        response.setChatId(songResponce.getChatId());
+        if (songResponce.getTrack() != null || songResponce.getSongId()!=null) {
 
-            sendAudio.setAudio(tlgUser.getTrack());
-            sendAudio.setChatId(tlgUser.getChatId());
+            sendAudio.setAudio(songResponce.getTrack());
+            sendAudio.setChatId(songResponce.getChatId());
 
-//            response.setText("Это нужная песня? (Введите \"да\" если это та песня)");
 
-            telegramUserService.addTelegramUser(tlgUser);
+            TelegramMessage telegramMessage = telegramUserService.findByChatId(chatId);
+            telegramMessage.setSongId(songResponce.getSongId());
+
+            telegramUserService.updateTelegramUser(telegramMessage);
+            System.out.println(telegramUserService.findByChatId(chatId));
+
+            response.setText("Песня загружается...");
 
             try {
+                bot.execute(response);
                 bot.execute(sendAudio);
-//                bot.execute(response);
+
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
@@ -61,7 +69,7 @@ public class MainController {
     }
 
     @PostMapping(value = "/approve")
-    public void approved(@RequestBody TelegramUser tlgUser) {
+    public void approved(@RequestBody TelegramMessage tlgUser) {
 
         Long chatId = tlgUser.getChatId();
         SendMessage response = new SendMessage();

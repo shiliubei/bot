@@ -7,7 +7,7 @@ import javax.persistence.Transient;
 import java.io.File;
 
 @Entity
-public class TelegramUser {
+public class TelegramMessage {
 
     @Id
     private Long chatId;
@@ -18,10 +18,10 @@ public class TelegramUser {
     @Transient
     private File track;
 
-    public TelegramUser() {
+    public TelegramMessage() {
     }
 
-    public TelegramUser(Long chatId, int statetId) {
+    public TelegramMessage(Long chatId, int statetId) {
         this.chatId = chatId;
         this.statetId = statetId;
     }
@@ -74,4 +74,14 @@ public class TelegramUser {
         this.track = track;
     }
 
+    @Override
+    public String toString() {
+        return "TelegramMessage{" +
+                "chatId=" + chatId +
+                ", statetId=" + statetId +
+                ", performerName='" + performerName + '\'' +
+                ", songName='" + songName + '\'' +
+                ", songId=" + songId +
+                '}';
+    }
 }

@@ -1,7 +1,7 @@
-package telegramApp.model;
+package telegramApp.dto;
 
-public abstract class Responce {
-    private Long chatId;
+public abstract class TelegramBotMessage {
+Long chatId;
 
     public Long getChatId() {
         return chatId;

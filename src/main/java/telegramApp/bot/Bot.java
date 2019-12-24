@@ -4,10 +4,17 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendAudio;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import telegramApp.model.TelegramUser;
+import telegramApp.dto.SongRequest;
+import telegramApp.model.TelegramMessage;
 import telegramApp.service.TelegramApiService;
 import telegramApp.service.TelegramUserService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class Bot extends TelegramLongPollingBot {
@@ -32,17 +39,6 @@ public class Bot extends TelegramLongPollingBot {
     }
 
 
-
-//    @Override
-//    public void onUpdateReceived(Update update) {
-//       if(update.hasMessage()){
-//           Message message = update.getMessage();
-//            Long chatId = message.getChatId();
-//            String text = message.getText();
-//
-//       }
-//    }
-
     @Override
     public void onUpdateReceived(Update update) {
         if (!update.hasMessage() || !update.getMessage().hasText())
@@ -51,43 +47,69 @@ public class Bot extends TelegramLongPollingBot {
         final String text = update.getMessage().getText();
         final long chatId = update.getMessage().getChatId();
 
-        TelegramUser telegramUser = telegramUserService.findByChatId(chatId);
+        TelegramMessage telegramMessage = telegramUserService.findByChatId(chatId);
 
         BotContext context;
         BotState state;
 
-        if (telegramUser == null){
+        if (telegramMessage == null){
             state = BotState.geInitialState();
 
-            telegramUser = new TelegramUser(chatId, state.ordinal());
-            telegramUserService.addTelegramUser(telegramUser);
+            telegramMessage = new TelegramMessage(chatId, state.ordinal());
+            telegramUserService.addTelegramUser(telegramMessage);
 
-            context = BotContext.of(this, telegramUser,text);
+            context = new BotContext(this, telegramMessage,text);
             state.enter(context);
 
-//            LOGGER.info("New telegramUser registered: "+ chatId);
         }else {
-            context = BotContext.of(this, telegramUser,text);
-            state = BotState.byId(telegramUser.getStatetId());
-
-//            LOGGER.info("Update received for telegramUser in state: "+ state);
+            context = new BotContext(this, telegramMessage,text);
+            state = BotState.byId(telegramMessage.getStatetId());
         }
 
         state.handleInput(context);
 
        do {
             state = state.nextState();
-            TelegramUser tlgUser = context.getTelegramUser();
-            // если на этапе 3
-            if(context.getTelegramUser().getStatetId()==2 && (tlgUser.getSongName()!= null || tlgUser.getPerformerName() !=null)){
-                telegramApiService.sendSong(tlgUser);
-            }
+            TelegramMessage tlgUser = context.getTelegramMessage();
+//            if(context.getTelegramMessage().getStatetId()==2 && (tlgUser.getSongName()!= null || tlgUser.getPerformerName() !=null)){
+//                SongRequest songRequestDto = new SongRequest(tlgUser);
+//                telegramApiService.sendAutorAndSongName(tlgUser);
+//            }
             state.enter(context);
         }
         while (!state.isInputNeeded());
 
-        telegramUser.setStatetId(state.ordinal());
-        telegramUserService.updateTelegramUser(telegramUser);
+        telegramMessage.setStatetId(state.ordinal());
+        telegramUserService.updateTelegramUser(telegramMessage);
+    }
+
+    public void sendToServer (TelegramMessage telegramMessage){
+        SongRequest songRequest = new SongRequest(telegramMessage);
+        telegramApiService.sendAutorAndSongName(songRequest);
+    }
+
+    public void sendSongIdToServer (TelegramMessage telegramMessage){
+        SongRequest songRequest = new SongRequest(telegramMessage);
+        telegramApiService.approveSong(songRequest);
+    }
+    public TelegramMessage getTelegramMessageFromDB  (Long chatId){
+        return telegramUserService.findByChatId(chatId);
+    }
+
+
+    //display keyboard buttons
+    public ReplyKeyboardMarkup getCustomReplyKeyboardMarkup1() {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        KeyboardRow keyboardRow1 = new KeyboardRow();
+        keyboardRow1.add(new KeyboardButton("Да"));
+        keyboardRow1.add(new KeyboardButton("Нет"));
+        keyboard.add(keyboardRow1);
+        replyKeyboardMarkup.setKeyboard(keyboard);
+        return replyKeyboardMarkup;
     }
 
 

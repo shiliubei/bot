@@ -1,14 +1,14 @@
 package telegramApp.service;
 
-import telegramApp.model.TelegramUser;
+import telegramApp.model.TelegramMessage;
 
 public interface TelegramUserService {
 
-    TelegramUser findByChatId(long id);
+    TelegramMessage findByChatId(long id);
 
     void deleteByChatId(Long id);
 
-    void addTelegramUser(TelegramUser telegramUser);
+    void addTelegramUser(TelegramMessage telegramMessage);
 
-    void updateTelegramUser(TelegramUser telegramUser);
+    void updateTelegramUser(TelegramMessage telegramMessage);
 }

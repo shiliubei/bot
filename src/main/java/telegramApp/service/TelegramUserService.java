@@ -1,7 +1,9 @@
 package telegramApp.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import telegramApp.model.TelegramMessage;
 
+@Transactional
 public interface TelegramUserService {
 
     TelegramMessage findByChatId(long id);

@@ -88,12 +88,12 @@ public enum BotState {
             }
 
         }
-
         public void handleInput(BotContext context) {
             String text = context.getInput();
 
             if (text.equals("Да")) {
-
+                TelegramMessage telegramMessage = context.getBot().getTelegramMessageFromDB(context.getTelegramMessage().getChatId());
+                context.getBot().sendSongIdToServer(telegramMessage);
                 next = Approved;
             } else {
                 next = EnterPerformerName;
@@ -111,8 +111,7 @@ public enum BotState {
 
         @Override
         public void enter(BotContext context) {
-            TelegramMessage telegramMessage = context.getBot().getTelegramMessageFromDB(context.getTelegramMessage().getChatId());
-            context.getBot().sendSongIdToServer(telegramMessage);
+
             sendMessage(context, "Спасибо, всё ок. Вы можете заказаеть ещё одну.");
         }
 

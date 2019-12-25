@@ -4,6 +4,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import telegramApp.dto.SongRequest;
+import telegramApp.dto.SongResponce;
 import telegramApp.model.TelegramMessage;
 
 @Service
@@ -15,9 +16,9 @@ public class TelegramApiServiceImpl implements TelegramApiService {
                 .build();
     }
 
-    public SongRequest sendAutorAndSongName(SongRequest songRequest) {
+    public SongResponce sendAutorAndSongName(SongRequest songRequest) {
         String URL = "http://localhost:8080/api/tlg/song";
-        return restTemplate.postForObject(URL, songRequest, SongRequest.class);
+        return restTemplate.postForObject(URL, songRequest, SongResponce.class);
     }
 
     public SongRequest approveSong(SongRequest telegramMessage) {

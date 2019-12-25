@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import telegramApp.dto.SongRequest;
+import telegramApp.dto.SongResponce;
 import telegramApp.model.TelegramMessage;
 import telegramApp.service.TelegramApiService;
 import telegramApp.service.TelegramUserService;
@@ -25,7 +26,7 @@ public class Bot extends TelegramLongPollingBot {
 
     private final TelegramApiService telegramApiService;
 
-    public void soundExecute(SendAudio sendAudio){
+    public void soundExecute(SendAudio sendAudio) {
         try {
             execute(sendAudio);
         } catch (TelegramApiException e) {
@@ -52,53 +53,56 @@ public class Bot extends TelegramLongPollingBot {
         BotContext context;
         BotState state;
 
-        if (telegramMessage == null){
+        if (telegramMessage == null) {
             state = BotState.geInitialState();
 
             telegramMessage = new TelegramMessage(chatId, state.ordinal());
             telegramUserService.addTelegramUser(telegramMessage);
 
-            context = new BotContext(this, telegramMessage,text);
+            context = new BotContext(this, telegramMessage, text);
             state.enter(context);
 
-        }else {
-            context = new BotContext(this, telegramMessage,text);
+        } else {
+            context = new BotContext(this, telegramMessage, text);
             state = BotState.byId(telegramMessage.getStatetId());
         }
 
         state.handleInput(context);
 
-       do {
+        do {
             state = state.nextState();
-            TelegramMessage tlgUser = context.getTelegramMessage();
-//            if(context.getTelegramMessage().getStatetId()==2 && (tlgUser.getSongName()!= null || tlgUser.getPerformerName() !=null)){
-//                SongRequest songRequestDto = new SongRequest(tlgUser);
-//                telegramApiService.sendAutorAndSongName(tlgUser);
-//            }
             state.enter(context);
         }
         while (!state.isInputNeeded());
+
+
+        context.getTelegramMessage().setSongId(telegramMessage.getSongId());
 
         telegramMessage.setStatetId(state.ordinal());
         telegramUserService.updateTelegramUser(telegramMessage);
     }
 
-    public void sendToServer (TelegramMessage telegramMessage){
+    public SongResponce sendToServer(TelegramMessage telegramMessage) {
         SongRequest songRequest = new SongRequest(telegramMessage);
-        telegramApiService.sendAutorAndSongName(songRequest);
+        return telegramApiService.sendAutorAndSongName(songRequest);
     }
 
-    public void sendSongIdToServer (TelegramMessage telegramMessage){
+    public void sendSongIdToServer(TelegramMessage telegramMessage) {
         SongRequest songRequest = new SongRequest(telegramMessage);
         telegramApiService.approveSong(songRequest);
     }
-    public TelegramMessage getTelegramMessageFromDB  (Long chatId){
+
+    public TelegramMessage getTelegramMessageFromDB(Long chatId) {
         return telegramUserService.findByChatId(chatId);
+    }
+    public void saveTelegramMessage (TelegramMessage telegramMessage){
+        telegramUserService.updateTelegramUser(telegramMessage);
     }
 
 
+
     //display keyboard buttons
-    public ReplyKeyboardMarkup getCustomReplyKeyboardMarkup1() {
+    public ReplyKeyboardMarkup getCustomReplyKeyboardMarkup() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setSelective(true);
         replyKeyboardMarkup.setResizeKeyboard(true);

@@ -1,8 +1,9 @@
 package telegramApp.bot;
 
+import org.telegram.telegrambots.meta.api.methods.send.SendAudio;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import telegramApp.dto.SongResponce;
 import telegramApp.model.TelegramMessage;
-import telegramApp.service.TelegramApiService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -54,9 +55,22 @@ public enum BotState {
         @Override
         public void handleInput(BotContext context) {
 
+            //записал название песни в объект
             context.getTelegramMessage().setSongName(context.getInput());
             context.getBot().sendToServer(context.getTelegramMessage());
-
+            SongResponce songResponce = context.getBot().sendToServer(context.getTelegramMessage());
+            Long songId = songResponce.getSongId();
+            TelegramMessage telegramMessage = context.getTelegramMessage();
+            telegramMessage.setSongId(songId);
+            context.getBot().saveTelegramMessage(telegramMessage);
+            SendAudio sendAudio = new SendAudio();
+            sendAudio.setAudio(songResponce.getTrack());
+            sendAudio.setChatId(songResponce.getChatId());
+            try {
+                context.getBot().execute(sendAudio);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
         }
 
 
@@ -72,14 +86,12 @@ public enum BotState {
         private BotState next;
         @Override
         public void enter(BotContext context) {
-//            if(context.getTelegramMessage().getSongId()!=null){
-//
-//            }
-            ReplyKeyboardMarkup customReplyKeyboardMarkup1 = context.getBot().getCustomReplyKeyboardMarkup1();
+
+            ReplyKeyboardMarkup customReplyKeyboardMarkup = context.getBot().getCustomReplyKeyboardMarkup();
             SendMessage message = new SendMessage()
                     .setChatId(context.getTelegramMessage().getChatId())
                     .enableMarkdown(true)
-                    .setReplyMarkup(customReplyKeyboardMarkup1)
+                    .setReplyMarkup(customReplyKeyboardMarkup)
                     .setText("Это нужная песня?");
             try {
                 context.getBot().execute(message);

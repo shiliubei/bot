@@ -55,7 +55,7 @@ public enum BotState {
         @Override
         public void handleInput(BotContext context) {
 
-            //записал название песни в объект
+           
             context.getTelegramMessage().setSongName(context.getInput());
             context.getBot().sendToServer(context.getTelegramMessage());
             SongResponce songResponce = context.getBot().sendToServer(context.getTelegramMessage());
@@ -64,9 +64,13 @@ public enum BotState {
             telegramMessage.setSongId(songId);
             context.getBot().saveTelegramMessage(telegramMessage);
             SendAudio sendAudio = new SendAudio();
+            SendMessage response = new SendMessage();
+            response.setText("Песня загружается...");
+            response.setChatId(songResponce.getChatId());
             sendAudio.setAudio(songResponce.getTrack());
             sendAudio.setChatId(songResponce.getChatId());
             try {
+                context.getBot().execute(response);
                 context.getBot().execute(sendAudio);
             } catch (TelegramApiException e) {
                 e.printStackTrace();

@@ -8,12 +8,13 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.ByteArrayInputStream;
+
 @Component
 public enum BotState {
 
 
-    Start (false){
-
+    Start(false) {
         @Override
         public void enter(BotContext context) {
             sendMessage(context, "Привет");
@@ -26,7 +27,6 @@ public enum BotState {
     },
 
     EnterPerformerName {
-
         @Override
         public void enter(BotContext context) {
             sendMessage(context, "Введите исполнителя");
@@ -46,7 +46,6 @@ public enum BotState {
     },
 
     EnterSongName {
-
         @Override
         public void enter(BotContext context) {
             sendMessage(context, "Введите название песни:");
@@ -55,11 +54,12 @@ public enum BotState {
         @Override
         public void handleInput(BotContext context) {
 
-           
             context.getTelegramMessage().setSongName(context.getInput());
             context.getBot().sendToServer(context.getTelegramMessage());
+
             SongResponce songResponce = context.getBot().sendToServer(context.getTelegramMessage());
             Long songId = songResponce.getSongId();
+
             TelegramMessage telegramMessage = context.getTelegramMessage();
             telegramMessage.setSongId(songId);
             context.getBot().saveTelegramMessage(telegramMessage);
@@ -67,7 +67,8 @@ public enum BotState {
             SendMessage response = new SendMessage();
             response.setText("Песня загружается...");
             response.setChatId(songResponce.getChatId());
-            sendAudio.setAudio(songResponce.getTrack());
+
+            sendAudio.setAudio(songResponce.getTrackName(), new ByteArrayInputStream(songResponce.getTrack()));
             sendAudio.setChatId(songResponce.getChatId());
             try {
                 context.getBot().execute(response);
@@ -88,6 +89,7 @@ public enum BotState {
     //Юзер должен нажать "да" если это та песня.
     Approve() {
         private BotState next;
+
         @Override
         public void enter(BotContext context) {
 
@@ -104,6 +106,7 @@ public enum BotState {
             }
 
         }
+
         public void handleInput(BotContext context) {
             String text = context.getInput();
 
@@ -124,10 +127,8 @@ public enum BotState {
     },
 
     Approved(false) {
-
         @Override
         public void enter(BotContext context) {
-
             sendMessage(context, "Спасибо, всё ок. Вы можете заказаеть ещё одну.");
         }
 

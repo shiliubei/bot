@@ -4,7 +4,7 @@ import org.springframework.transaction.annotation.Transactional;
 import telegramApp.model.TelegramMessage;
 
 @Transactional
-public interface TelegramUserService {
+public interface TelegramMessageService {
 
     TelegramMessage findByChatId(long id);
 

@@ -1,5 +1,7 @@
 package telegramApp.bot;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendAudio;
@@ -12,30 +14,29 @@ import telegramApp.dto.SongRequest;
 import telegramApp.dto.SongResponce;
 import telegramApp.model.TelegramMessage;
 import telegramApp.service.TelegramApiService;
-import telegramApp.service.TelegramUserService;
+import telegramApp.service.TelegramMessageService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@PropertySource("classpath:telegram.properties")
 public class Bot extends TelegramLongPollingBot {
 
 
-    private final TelegramUserService telegramUserService;
+    private final TelegramMessageService telegramMessageService;
 
 
     private final TelegramApiService telegramApiService;
 
-    public void soundExecute(SendAudio sendAudio) {
-        try {
-            execute(sendAudio);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
+    @Value("${bot.name}")
+    private String botName;
 
-    public Bot(TelegramUserService telegramUserService, TelegramApiService telegramApiService) {
-        this.telegramUserService = telegramUserService;
+    @Value("${bot.token}")
+    private String botToken;
+
+    public Bot(TelegramMessageService telegramMessageService, TelegramApiService telegramApiService) {
+        this.telegramMessageService = telegramMessageService;
         this.telegramApiService = telegramApiService;
     }
 
@@ -48,7 +49,7 @@ public class Bot extends TelegramLongPollingBot {
         final String text = update.getMessage().getText();
         final long chatId = update.getMessage().getChatId();
 
-        TelegramMessage telegramMessage = telegramUserService.findByChatId(chatId);
+        TelegramMessage telegramMessage = telegramMessageService.findByChatId(chatId);
 
         BotContext context;
         BotState state;
@@ -57,7 +58,7 @@ public class Bot extends TelegramLongPollingBot {
             state = BotState.geInitialState();
 
             telegramMessage = new TelegramMessage(chatId, state.ordinal());
-            telegramUserService.addTelegramUser(telegramMessage);
+            telegramMessageService.addTelegramUser(telegramMessage);
 
             context = new BotContext(this, telegramMessage, text);
             state.enter(context);
@@ -75,11 +76,9 @@ public class Bot extends TelegramLongPollingBot {
         }
         while (!state.isInputNeeded());
 
-
         context.getTelegramMessage().setSongId(telegramMessage.getSongId());
-
         telegramMessage.setStatetId(state.ordinal());
-        telegramUserService.updateTelegramUser(telegramMessage);
+        telegramMessageService.updateTelegramUser(telegramMessage);
     }
 
     public SongResponce sendToServer(TelegramMessage telegramMessage) {
@@ -93,12 +92,12 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     public TelegramMessage getTelegramMessageFromDB(Long chatId) {
-        return telegramUserService.findByChatId(chatId);
-    }
-    public void saveTelegramMessage (TelegramMessage telegramMessage){
-        telegramUserService.updateTelegramUser(telegramMessage);
+        return telegramMessageService.findByChatId(chatId);
     }
 
+    public void saveTelegramMessage(TelegramMessage telegramMessage) {
+        telegramMessageService.updateTelegramUser(telegramMessage);
+    }
 
 
     //display keyboard buttons
@@ -119,11 +118,11 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public String getBotToken() {
-        return "984357723:AAFxB5Vx-l8sl675bG1zcqGwZ1YlznGUSpA";
+        return botToken;
     }
 
     @Override
     public String getBotUsername() {
-        return "SongName_bot";
+        return botName;
     }
 }

@@ -1,20 +1,20 @@
 package telegramApp.dto;
 
-import java.io.File;
-
 public class SongResponce {
 
     private Long chatId;
     private Long songId;
-    private File track;
+    private byte[] track;
+    private String trackName;
 
     public SongResponce() {
     }
 
-    public SongResponce(Long chatId, Long songId, File track) {
+    public SongResponce(Long chatId, Long songId, byte[] track, String trackName) {
         this.chatId = chatId;
         this.songId = songId;
         this.track = track;
+        this.trackName = trackName;
     }
 
     public Long getChatId() {
@@ -33,11 +33,19 @@ public class SongResponce {
         this.songId = songId;
     }
 
-    public File getTrack() {
+    public byte[] getTrack() {
         return track;
     }
 
-    public void setTrack(File track) {
+    public void setTrack(byte[] track) {
         this.track = track;
+    }
+
+    public String getTrackName() {
+        return trackName;
+    }
+
+    public void setTrackName(String trackName) {
+        this.trackName = trackName;
     }
 }
